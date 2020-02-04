@@ -8,11 +8,17 @@ public class playerController : MonoBehaviour
     public Transform groundCheck;
     public LayerMask groundLayer;
     private Rigidbody2D rb;
-    private float dir=0;
+    private float dir = 0;
     public float speed;
-    private float extraSpeed=0f;
+    private float extraSpeed = 0f;
     public float extraSpeedAmount;
     public float jumpVel;
+
+    public float dashTime = 1f;
+    private float curDash = 0f;
+    private bool hasDash = true;
+    private Vector2 dashVel;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -29,8 +35,13 @@ public class playerController : MonoBehaviour
         {
             if (isGrounded)
             {
-                rb.AddForce(new Vector2 (0f, jumpVel));
+                rb.AddForce(new Vector2(0f, jumpVel));
             }
+        }
+
+        if (isGrounded)
+        {
+            hasDash = true;
         }
 
         //decrement extra speed
@@ -38,11 +49,39 @@ public class playerController : MonoBehaviour
         {
             extraSpeed -= Time.deltaTime * 60;
         }
+
+        //check for dash input
+        if (Input.GetButtonDown("Dash") && hasDash)
+        {
+            hasDash = false;
+            print("DASH");
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            rb.gravityScale = 0;
+            curDash = dashTime;
+            rb.velocity = rb.velocity * 4;
+        }
+
+        if (curDash >= 0f)
+        {
+            curDash -= Time.deltaTime;
+            if (curDash < 0)
+            {
+                rb.gravityScale = 1;
+            }
+        }
     }
 
-    private void FixedUpdate() 
+    private void FixedUpdate()
     {
-        rb.velocity = new Vector2 (dir * (speed+extraSpeed) * Time.deltaTime, rb.velocity.y);
+        if (curDash <= 0) //if not dashing
+            rb.velocity = new Vector2(dir * (speed + extraSpeed) * Time.deltaTime, rb.velocity.y);
+        else //is dashing
+        {
+            
+
+        }
+
+
     }
 
     public void speedup()
